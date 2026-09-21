@@ -1,0 +1,6 @@
+# 运行依赖
+# Tkinter 是 Python 标准库，随解释器自带，无需安装
+pillow>=9.0.0        # 仅完整版 main.py 的 GIF 启动动画需要；纯净版 main_clear.py 不需要
+
+# 打包（可选）
+pyinstaller>=5.0

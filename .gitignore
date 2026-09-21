@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# 虚拟环境
+venv/
+.venv/
+env/
+
+# 打包产物
+build/
+dist/
+*.manifest
+
+# 未被引用的备用素材（体积大，且代码里没有任何引用）
+assets/*.mp4
+
+# 编辑器 / 系统
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
