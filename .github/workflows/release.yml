@@ -1,0 +1,59 @@
+name: Release
+
+# 推送 v* 标签时自动打包 Windows exe 并发布到 GitHub Release。
+#   v1.0.0        -> 同时上传完整版与纯净版
+#   v1.0.0-full   -> 只上传完整版（带 GIF 启动动画）
+#   v1.0.0-pure   -> 只上传纯净版（无启动动画）
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 准备 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 安装依赖
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: 打包完整版（带 GIF 启动动画）
+        run: pyinstaller packaging/soc.spec --noconfirm
+
+      - name: 打包纯净版（无启动动画）
+        run: pyinstaller packaging/socClear.spec --noconfirm
+
+      - name: 按标签挑选要上传的产物
+        shell: pwsh
+        run: |
+          $tag = $env:GITHUB_REF_NAME
+          New-Item -ItemType Directory -Force -Path upload | Out-Null
+          if ($tag -like '*-full') {
+            Copy-Item 'dist/Socionics类间关系计算器.exe' upload/
+          } elseif ($tag -like '*-pure') {
+            Copy-Item 'dist/Soc类间关系计算器纯净版.exe' upload/
+          } else {
+            Copy-Item 'dist/*.exe' upload/
+          }
+          Write-Output "标签 $tag 上传以下文件："
+          Get-ChildItem upload | Select-Object -ExpandProperty Name
+
+      - name: 发布到 Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: upload/*.exe
+          generate_release_notes: true
